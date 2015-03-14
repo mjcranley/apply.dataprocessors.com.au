@@ -34,11 +34,11 @@ script = """
     });
 })();"""
 driver.execute_script(script)
-response = str(raw_input("Was submission successful? [y/n]"))
+response = str(raw_input("Was submission successful? [y/n]: "))
 if response in {'Y', 'y', 'Yes', 'yes', ''}:
     print "Congratulations! Refer to open Firefox window for instructions"
 elif response in {'N', 'n', 'No', 'no'}:
-    retry = str(raw_input("Would you like to try again? [y/n]"))
+    retry = str(raw_input("Would you like to try again? [y/n]: "))
     if retry in {'Y', 'y', 'Yes', 'yes', ''}:
         driver.close()
         driver.get(URL)
