@@ -1,8 +1,8 @@
 from selenium import webdriver
+import sys
+import signal
 
-driver = webdriver.Firefox()
 URL = 'http://apply.dataprocessors.com.au/'
-driver.get(URL)
 script = """
 (function() {
     var script = document.createElement("SCRIPT");
@@ -33,21 +33,22 @@ script = """
         submt.click();
     });
 })();"""
-driver.execute_script(script)
-response = str(raw_input("Was submission successful? [y/n]: "))
-if response in {'Y', 'y', 'Yes', 'yes', ''}:
-    print "Congratulations! Refer to open Firefox window for instructions"
-elif response in {'N', 'n', 'No', 'no'}:
-    retry = str(raw_input("Would you like to try again? [y/n]: "))
-    if retry in {'Y', 'y', 'Yes', 'yes', ''}:
-        driver.close()
-        driver.get(URL)
-        driver.execute(script)
-    elif retry in {'N', 'n', 'No', 'no'}:
-        print "Submission Failed"
-    else:
-        print "Not an accepted answer, Submission Failed"
-else:
-    print "Not an accepted answer, Submission Failed"
-    driver.close()
 
+def signal_handler(signal, frame):
+    print "Submission aborted"
+    sys.exit(0)
+
+def submission(URL):
+    signal.signal(signal.SIGINT, signal_handler)
+    driver = webdriver.Firefox()
+    driver.get(URL)
+    driver.execute_script(script)
+    if driver.find_element_by_xpath("/html/body/p[1]").text == "Congratulations!":
+        print "Congratulations! Refer to open Firefox window for instructions"
+    else:
+        driver.close()
+        print "Submission Failed, attempting again - CTRL-C to abort"
+        submission(URL)
+
+if __name__ == "__main__":
+    submission('http://apply.dataprocessors.com.au/')
